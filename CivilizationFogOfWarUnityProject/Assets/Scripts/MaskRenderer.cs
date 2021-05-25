@@ -6,7 +6,7 @@ using UnityEngine;
 /// </summary>
 public class MaskRenderer : MonoBehaviour
 {
-    private static List<GridCell> cells;
+    private static List<GridCell> _cells;
 
     /// <summary>
     /// Each cell registers itself at startup using this function
@@ -15,7 +15,7 @@ public class MaskRenderer : MonoBehaviour
     /// <param name="cell">The cell object to add to the list</param>
     public static void RegisterCell(GridCell cell)
     {
-        cells.Add(cell);
+        _cells.Add(cell);
     }
 
     //Properties
@@ -23,35 +23,29 @@ public class MaskRenderer : MonoBehaviour
     /// <summary>
     /// The compute shader to use for rendering the mask
     /// </summary>
-    [SerializeField]
-    private ComputeShader computeShader = null;
+    [SerializeField] private ComputeShader computeShader = null;
 
     /// <summary>
     /// The size the mask should have
     /// Idealy this is a power of two
     /// </summary>
-    [Range(64, 4096)]
-    [SerializeField]
-    private int TextureSize = 1024;
+    [Range(64, 4096)] [SerializeField] private int TextureSize = 1024;
 
     /// <summary>
     /// The size of the hex grid in actual units
     /// This is used to scale the mask texture so it stretches across the map
     /// </summary>
-    [SerializeField]
-    private float MapSize = 0;
+    [SerializeField] private float MapSize = 0;
 
     /// <summary>
     /// Radius of a grid cell
     /// </summary>
-    [SerializeField]
-    private float Radius = 1.0f;
+    [SerializeField] private float Radius = 1.0f;
 
     /// <summary>
     /// Blend distance between visible and hidden area
     /// </summary>
-    [SerializeField, Range(0.0f, 1.0f)]
-    private float BlendDistance = 0.8f;
+    [SerializeField, Range(0.0f, 1.0f)] private float BlendDistance = 0.8f;
 
     private RenderTexture maskTexture;
 
@@ -84,12 +78,13 @@ public class MaskRenderer : MonoBehaviour
     private void Awake()
     {
         //It is important that this is in Awake and the Cell's are getting added in Start()
-        cells = new List<GridCell>();
+        _cells = new List<GridCell>();
 
         //Create a new render texture for the mask
-        maskTexture = new RenderTexture(TextureSize, TextureSize, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Linear) 
-        { 
-            enableRandomWrite = true 
+        maskTexture = new RenderTexture(TextureSize, TextureSize, 0, RenderTextureFormat.ARGB32,
+            RenderTextureReadWrite.Linear)
+        {
+            enableRandomWrite = true
         };
         maskTexture.Create();
 
@@ -118,7 +113,7 @@ public class MaskRenderer : MonoBehaviour
         //This is not extremely optimized as we could also simply change 
         //values but it is fine for a project as small as this one
         bufferElements.Clear();
-        foreach (GridCell cell in cells)
+        foreach (GridCell cell in _cells)
         {
             CellBufferElement element = new CellBufferElement
             {
@@ -130,7 +125,7 @@ public class MaskRenderer : MonoBehaviour
             bufferElements.Add(element);
         }
 
-        if(buffer == null)
+        if (buffer == null)
             buffer = new ComputeBuffer(bufferElements.Count * 3, sizeof(float));
 
         //Set the buffer data and parse it to the compute shader

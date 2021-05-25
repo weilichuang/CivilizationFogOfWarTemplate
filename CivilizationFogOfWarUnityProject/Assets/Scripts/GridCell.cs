@@ -10,7 +10,8 @@ public class GridCell : MonoBehaviour
     /// Ranges from 0 to 1 with 0 indicating that the cell is not visible
     /// </summary>
     public float Visibility { get; private set; }
-    private bool isVisible = false;
+
+    private bool _isVisible = false;
 
     /// <summary>
     /// Register this cell in the mask rendering script
@@ -45,9 +46,9 @@ public class GridCell : MonoBehaviour
         if (!Input.GetMouseButton(0))
             return;
 
-        isVisible = !isVisible;
+        _isVisible = !_isVisible;
         StopAllCoroutines();
-        StartCoroutine(AnimateVisibility(isVisible ? 1.0f : 0.0f));
+        StartCoroutine(AnimateVisibility(_isVisible ? 1.0f : 0.0f));
     }
 
     /// <summary>
@@ -58,15 +59,16 @@ public class GridCell : MonoBehaviour
     /// <returns>Yield</returns>
     private IEnumerator AnimateVisibility(float targetVal)
     {
-        float startingTime = Time.time;
-        float startingVal = Visibility;
-        float lerpVal = 0.0f;
-        while(lerpVal < 1.0f)
+        var startingTime = Time.time;
+        var startingVal = Visibility;
+        var lerpVal = 0.0f;
+        while (lerpVal < 1.0f)
         {
             lerpVal = (Time.time - startingTime) / 1.0f;
             Visibility = Mathf.Lerp(startingVal, targetVal, lerpVal);
             yield return null;
         }
+
         Visibility = targetVal;
     }
 }
